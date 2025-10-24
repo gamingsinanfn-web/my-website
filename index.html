@@ -52,6 +52,7 @@
         .module { background: rgba(0,255,255,0.08); padding: 15px; border-radius: 10px; margin: 12px 0; }
         .del { background: #ff4444; padding: 8px 12px; font-size: 13px; width: auto; float: right; }
         #discord { background: var(--cyan); color: #000; padding: 10px 18px; border-radius: 999px; text-decoration: none; font-weight: bold; display: inline-block; margin: 8px 0; }
+        #langSelect { width: auto; display: inline-block; margin: 8px 0; }
 
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px; opacity: 0; transition: opacity 0.3s ease;
@@ -61,7 +62,6 @@
             background: var(--card); padding: 25px; border-radius: 16px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.7); max-height: 80vh; overflow-y: auto; transform: scale(0.8); transition: transform 0.3s ease;
         }
         .modal-card.show { transform: scale(1); }
-        .modal-card button { background: #00ff88; color: #000; }
         .modal-card ul { list-style: none; padding: 0; text-align: left; }
         .modal-card li { padding: 8px 0; }
         #error { color: #ff6b6b; margin-top: 10px; display: none; }
@@ -78,45 +78,49 @@
 </head>
 <body>
     <header>
-        <h1>UltimateGen</h1>
-        <a id="discord" href="https://discord.gg/zMh5NVdgCb" target="_blank">Join Discord</a>
-        <div>Mitglieder: <strong>1247</strong></div>
+        <h1 data-i18n="title">UltimateGen</h1>
+        <select id="langSelect">
+            <option value="de">Deutsch</option>
+            <option value="en">English</option>
+        </select>
+        <a id="discord" href="https://discord.gg/zMh5NVdgCb" target="_blank" data-i18n="discord">Join Discord</a>
+        <div data-i18n="members">Mitglieder: <strong>1247</strong></div>
     </header>
 
     <main>
         <div class="container">
-            <select id="select"><option value="">Wähle Modul</option></select>
+            <select id="select"><option value="" data-i18n="selectModule">Wähle Modul</option></select>
             <div>
-                <button id="gen">Generate</button>
-                <button id="claim" disabled>Claim</button>
-                <button id="stockBtn">Stock</button>
+                <button id="gen" data-i18n="generate">Generate</button>
+                <button id="claim" disabled data-i18n="claim">Claim</button>
+                <button id="stockBtn" data-i18n="stock">Stock</button>
             </div>
             <div id="accountBox"></div>
             <div class="stats">
-                <p>Aktive Nutzer: <span id="users">0</span></p>
+                <p data-i18n="activeUsers">Aktive Nutzer: <span id="users">0</span></p>
             </div>
 
-            <button id="adminBtn">Admin öffnen</button>
+            <button id="adminBtn" data-i18n="openAdmin">Admin öffnen</button>
 
             <div id="adminPanel">
-                <h3>Stock bearbeiten</h3>
+                <h3 data-i18n="editStock">Stock bearbeiten</h3>
                 <div id="modules"></div>
-                <button id="addBtn" style="background:#00ff88;color:#000;">+ Neues Modul</button>
-                <button id="saveBtn" style="background:#00ff88;color:#000;margin-top:15px;">SPEICHERN</button>
-                <button id="closeBtn" style="background:#666;margin-top:8px;">Schließen</button>
+                <button id="addBtn" style="background:#00ff88;color:#000;" data-i18n="newModule">+ Neues Modul</button>
+                <button id="saveBtn" style="background:#00ff88;color:#000;margin-top:15px;" data-i18n="save">SPEICHERN</button>
+                <button id="closeBtn" style="background:#666;margin-top:8px;" data-i18n="close">Schließen</button>
             </div>
         </div>
     </main>
 
-    <footer>© 2025 UltimateGen</footer>
+    <footer data-i18n="footer">© 2025 UltimateGen</footer>
 
     <div class="modal-overlay" id="loginModal">
         <div class="modal-card">
-            <h3>Admin Passwort</h3>
-            <input id="pass" type="password" placeholder="Passwort eingeben" />
-            <button id="loginBtn">Einloggen</button>
-            <p id="error">Falsches Passwort!</p>
-            <button id="cancelBtn" style="background:#666;margin-top:10px;">Abbrechen</button>
+            <h3 data-i18n="adminPassword">Admin Passwort</h3>
+            <input id="pass" type="password" placeholder="Passwort eingeben" data-i18n-placeholder="enterPassword" />
+            <button id="loginBtn" data-i18n="login">Einloggen</button>
+            <p id="error" data-i18n="wrongPassword">Falsches Passwort!</p>
+            <button id="cancelBtn" style="background:#666;margin-top:10px;" data-i18n="cancel">Abbrechen</button>
         </div>
     </div>
 
@@ -125,6 +129,97 @@
         const STOCK = 'ug_stock';
         let data = {};
         let selected = '';
+        let currentLang = localStorage.getItem('language') || 'de';
+
+        const languages = {
+            de: {
+                title: 'UltimateGen',
+                discord: 'Join Discord',
+                members: 'Mitglieder: <strong>1247</strong>',
+                selectModule: 'Wähle Modul',
+                generate: 'Generate',
+                claim: 'Claim',
+                stock: 'Stock',
+                activeUsers: 'Aktive Nutzer: <span id="users">0</span>',
+                openAdmin: 'Admin öffnen',
+                editStock: 'Stock bearbeiten',
+                newModule: '+ Neues Modul',
+                save: 'SPEICHERN',
+                close: 'Schließen',
+                adminPassword: 'Admin Passwort',
+                enterPassword: 'Passwort eingeben',
+                login: 'Einloggen',
+                wrongPassword: 'Falsches Passwort!',
+                cancel: 'Abbrechen',
+                footer: '© 2025 UltimateGen',
+                noStock: 'Kein Stock verfügbar.',
+                stockTitle: 'Verfügbarer Stock',
+                noStockForModule: module => `Kein Stock für ${module || 'das ausgewählte Modul'} verfügbar!`,
+                noAccountForModule: module => `Kein Account für ${module || 'das ausgewählte Modul'} verfügbar!`,
+                moduleExists: 'Modulname existiert bereits!',
+                invalidModuleName: 'Bitte geben Sie einen gültigen Modulnamen ein.',
+                saveError: 'Fehler beim Speichern des Stocks!',
+                saveSuccess: 'Stock gespeichert!',
+                deleteConfirm: name => `"${name}" löschen?`,
+                copyError: 'Fehler beim Kopieren!',
+                verifiedClaim: 'Verifiziert – klicke auf Claim!'
+            },
+            en: {
+                title: 'UltimateGen',
+                discord: 'Join Discord',
+                members: 'Members: <strong>1247</strong>',
+                selectModule: 'Select Module',
+                generate: 'Generate',
+                claim: 'Claim',
+                stock: 'Stock',
+                activeUsers: 'Active Users: <span id="users">0</span>',
+                openAdmin: 'Open Admin',
+                editStock: 'Edit Stock',
+                newModule: '+ New Module',
+                save: 'SAVE',
+                close: 'Close',
+                adminPassword: 'Admin Password',
+                enterPassword: 'Enter Password',
+                login: 'Login',
+                wrongPassword: 'Wrong Password!',
+                cancel: 'Cancel',
+                footer: '© 2025 UltimateGen',
+                noStock: 'No stock available.',
+                stockTitle: 'Available Stock',
+                noStockForModule: module => `No stock available for ${module || 'the selected module'}!`,
+                noAccountForModule: module => `No account available for ${module || 'the selected module'}!`,
+                moduleExists: 'Module name already exists!',
+                invalidModuleName: 'Please enter a valid module name.',
+                saveError: 'Error saving stock!',
+                saveSuccess: 'Stock saved!',
+                deleteConfirm: name => `Delete "${name}"?`,
+                copyError: 'Error copying to clipboard!',
+                verifiedClaim: 'Verified – click Claim!'
+            }
+        };
+
+        // Set language and update DOM
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('language', lang);
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (languages[lang][key]) {
+                    el.innerHTML = languages[lang][key];
+                }
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (languages[lang][key]) {
+                    el.placeholder = languages[lang][key];
+                }
+            });
+            document.getElementById('langSelect').value = lang;
+            updateSelect(); // Re-render select with translated placeholder
+            if (document.getElementById('adminPanel').style.display === 'block') {
+                renderAdmin(); // Re-render admin panel with translated texts
+            }
+        }
 
         // Initialize data from localStorage
         function loadData() {
@@ -140,7 +235,7 @@
         function updateSelect() {
             const select = document.getElementById('select');
             if (!select) return console.error('Select element not found');
-            select.innerHTML = '<option value="">Wähle Modul</option>';
+            select.innerHTML = `<option value="" data-i18n="selectModule">${languages[currentLang].selectModule}</option>`;
             Object.keys(data).forEach(key => {
                 if (Array.isArray(data[key]) && data[key].length > 0) {
                     const option = document.createElement('option');
@@ -154,7 +249,7 @@
         // Show stock in a modal
         function showStock() {
             console.log('Stock button clicked');
-            let html = '<h3>Verfügbarer Stock</h3><ul>';
+            let html = `<h3 data-i18n="stockTitle">${languages[currentLang].stockTitle}</h3><ul>`;
             let hasStock = false;
 
             Object.keys(data).forEach(key => {
@@ -164,14 +259,14 @@
                 }
             });
 
-            html += hasStock ? '</ul>' : '</ul><p><em>Kein Stock verfügbar.</em></p>';
+            html += hasStock ? '</ul>' : `</ul><p><em data-i18n="noStock">${languages[currentLang].noStock}</em></p>`;
 
             const modal = document.createElement('div');
             modal.className = 'modal-overlay';
             modal.innerHTML = `
                 <div class="modal-card">
                     ${html}
-                    <button id="modalCloseBtn" style="margin-top:15px;padding:10px;background:#ff4d4f;color:#000;border:none;border-radius:8px;">Schließen</button>
+                    <button id="modalCloseBtn" style="margin-top:15px;padding:10px;background:#ff4d4f;color:#000;border:none;border-radius:8px;" data-i18n="close">${languages[currentLang].close}</button>
                 </div>
             `;
             document.body.appendChild(modal);
@@ -200,29 +295,22 @@
                 const div = document.createElement('div');
                 div.className = 'module';
                 div.innerHTML = `
-                    <input type="text" value="${key}" data-old="${key}" placeholder="Modulname" required>
-                    <textarea placeholder="email:pass (eine pro Zeile)" style="height:100px;">${(data[key] || []).join('\n')}</textarea>
-                    <button class="del" data-name="${key}">Löschen</button>
+                    <input type="text" value="${key}" data-old="${key}" placeholder="${languages[currentLang].enterModuleName || 'Modulname'}" required>
+                    <textarea placeholder="${languages[currentLang].enterAccounts || 'email:pass (eine pro Zeile)'}" style="height:100px;">${(data[key] || []).join('\n')}</textarea>
+                    <button class="del" data-name="${key}" data-i18n="delete">Löschen</button>
                 `;
                 list.appendChild(div);
+            });
+            // Re-apply translations for dynamic delete buttons
+            list.querySelectorAll('[data-i18n="delete"]').forEach(el => {
+                el.textContent = languages[currentLang].delete || 'Löschen';
             });
         }
 
         // Initialize page state
         function init() {
             loadData();
-            updateSelect();
-            if (location.search.includes('c=')) {
-                const claimBtn = document.getElementById('claim');
-                const accountBox = document.getElementById('accountBox');
-                if (claimBtn && accountBox) {
-                    claimBtn.disabled = false;
-                    accountBox.innerHTML = '<em>Verifiziert – klicke auf Claim!</em>';
-                    accountBox.style.display = 'block';
-                } else {
-                    console.error('Claim or accountBox element not found');
-                }
-            }
+            setLanguage(currentLang);
         }
 
         // Save data to localStorage
@@ -230,10 +318,10 @@
             try {
                 localStorage.setItem(STOCK, JSON.stringify(data));
                 updateSelect();
-                alert('Stock gespeichert!');
+                alert(languages[currentLang].saveSuccess);
             } catch (err) {
                 console.error('Failed to save data to localStorage:', err);
-                alert('Fehler beim Speichern des Stocks!');
+                alert(languages[currentLang].saveError);
             }
         }
 
@@ -257,13 +345,19 @@
                 accountBox: document.getElementById('accountBox'),
                 error: document.getElementById('error'),
                 loginModal: document.getElementById('loginModal'),
-                adminPanel: document.getElementById('adminPanel')
+                adminPanel: document.getElementById('adminPanel'),
+                langSelect: document.getElementById('langSelect')
             };
 
             if (Object.values(elements).some(el => !el)) {
                 console.error('One or more DOM elements not found');
                 return;
             }
+
+            // Language switcher
+            elements.langSelect.onchange = () => {
+                setLanguage(elements.langSelect.value);
+            };
 
             // Admin panel handlers
             elements.adminBtn.onclick = () => {
@@ -307,22 +401,22 @@
             };
 
             elements.addBtn.onclick = () => {
-                const name = prompt("Modulname:");
+                const name = prompt(languages[currentLang].enterModuleNamePrompt || 'Modulname:');
                 if (name && name.trim() && !data[name.trim()]) {
                     data[name.trim()] = [];
                     renderAdmin();
                     updateSelect();
                 } else if (name && data[name.trim()]) {
-                    alert('Modulname existiert bereits!');
+                    alert(languages[currentLang].moduleExists);
                 } else {
-                    alert('Bitte geben Sie einen gültigen Modulnamen ein.');
+                    alert(languages[currentLang].invalidModuleName);
                 }
             };
 
             elements.modules.addEventListener('click', e => {
                 if (e.target.classList.contains('del')) {
                     const name = e.target.dataset.name;
-                    if (confirm(`"${name}" löschen?`)) {
+                    if (confirm(languages[currentLang].deleteConfirm(name))) {
                         delete data[name];
                         renderAdmin();
                         updateSelect();
@@ -345,7 +439,7 @@
                     }
                 });
                 if (!valid) {
-                    alert('Bitte geben Sie gültige Modulnamen ein.');
+                    alert(languages[currentLang].invalidModuleName);
                     return;
                 }
                 data = newData;
@@ -360,49 +454,50 @@
 
             elements.genBtn.onclick = () => {
                 if (!selected || !data[selected]?.length) {
-                    alert(`Kein Stock für ${selected || 'das ausgewählte Modul'} verfügbar!`);
+                    alert(languages[currentLang].noStockForModule(selected));
                     return;
                 }
-                elements.genBtn.textContent = 'Weiterleitung...';
+                elements.genBtn.textContent = languages[currentLang].generating || 'Weiterleitung...';
                 elements.genBtn.classList.add('spinner');
                 history.pushState({ verify: true }, '', `?c=${Date.now()}`);
                 elements.claimBtn.disabled = false;
-                elements.accountBox.innerHTML = '<em>Verifiziert – klicke auf Claim!</em>';
+                elements.accountBox.innerHTML = `<em data-i18n="verifiedClaim">${languages[currentLang].verifiedClaim}</em>`;
                 elements.accountBox.style.display = 'block';
                 setTimeout(() => {
-                    elements.genBtn.textContent = 'Generate';
+                    elements.genBtn.textContent = languages[currentLang].generate;
                     elements.genBtn.classList.remove('spinner');
                 }, 500);
             };
 
             elements.claimBtn.onclick = () => {
                 if (!selected || !data[selected]?.length) {
-                    alert(`Kein Account für ${selected || 'das ausgewählte Modul'} verfügbar!`);
+                    alert(languages[currentLang].noAccountForModule(selected));
                     return;
                 }
                 const account = data[selected].shift();
                 saveData();
 
                 elements.accountBox.style.display = 'block';
-                elements.accountBox.innerHTML = `<strong>${selected}:</strong><br>${account}<button class="copy">Kopieren</button>`;
+                elements.accountBox.innerHTML = `<strong>${selected}:</strong><br>${account}<button class="copy" data-i18n="copy">Kopieren</button>`;
+                elements.accountBox.querySelector('.copy').textContent = languages[currentLang].copy || 'Kopieren';
                 elements.accountBox.querySelector('.copy').onclick = () => {
                     navigator.clipboard.writeText(account).then(() => {
                         const btn = elements.accountBox.querySelector('.copy');
-                        btn.textContent = 'Kopiert!';
+                        btn.textContent = languages[currentLang].copied || 'Kopiert!';
                         btn.style.background = '#00cc77';
                         setTimeout(() => {
-                            btn.textContent = 'Kopieren';
+                            btn.textContent = languages[currentLang].copy || 'Kopieren';
                             btn.style.background = '#00ff88';
                         }, 1500);
                     }).catch(err => {
                         console.error('Clipboard copy failed:', err);
-                        alert('Fehler beim Kopieren!');
+                        alert(languages[currentLang].copyError);
                     });
                 };
 
                 elements.claimBtn.disabled = true;
                 elements.genBtn.disabled = !selected;
-                elements.genBtn.textContent = 'Generate';
+                elements.genBtn.textContent = languages[currentLang].generate;
                 history.replaceState(null, '', location.pathname);
             };
 
@@ -411,6 +506,13 @@
                 console.log('Stock button clicked');
                 showStock();
             };
+
+            // Handle popstate for claim verification
+            if (location.search.includes('c=')) {
+                elements.claimBtn.disabled = false;
+                elements.accountBox.innerHTML = `<em data-i18n="verifiedClaim">${languages[currentLang].verifiedClaim}</em>`;
+                elements.accountBox.style.display = 'block';
+            }
         });
 
         window.addEventListener('popstate', init);
