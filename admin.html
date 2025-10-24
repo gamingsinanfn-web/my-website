@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <title>Admin Panel - UltimateGen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        :root { --accent: #FF4D4F; --bg: #0d1117; --text: #e8eef6; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--text); font-family: Arial; padding: 20px; }
+        .container { max-width: 700px; margin: auto; background: rgba(255,255,255,0.02); padding: 25px; border-radius: 16px; }
+        h1 { text-align: center; margin-bottom: 20px; }
+        .module { background: rgba(0,255,255,0.05); padding: 15px; border-radius: 10px; margin: 15px 0; }
+        input, textarea, button { width: 100%; padding: 12px; margin: 8px 0; border: none; border-radius: 8px; }
+        input, textarea { background: #071229; color: #e6f7ff; }
+        button { background: var(--accent); color: #000; font-weight: bold; cursor: pointer; }
+        .del-btn { background: #ff4444; padding: 8px 12px; font-size: 12px; width: auto; display: inline-block; }
+        #loginBox { text-align: center; margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>UltimateGen Admin Panel</h1>
+
+        <div id="loginBox">
+            <input id="pass" type="password" placeholder="Admin Passwort" />
+            <button id="loginBtn">Einloggen</button>
+            <p id="error" style="color:#ff6b6b;margin-top:10px;display:none;">Falsches Passwort!</p>
+        </div>
+
+        <div id="adminPanel" style="display:none;">
+            <button id="addModuleBtn" style="background:#00ff88;color:#000;">+ Neues Modul</button>
+            <div id="modulesList"></div>
+            <button id="saveBtn" style="margin-top:20px;background:#00ff88;color:#000;">ALLE SPEICHERN</button>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PASS = "ultimate123";
+        const STOCK_KEY = 'ultimategen_stock';
+        let stock = JSON.parse(localStorage.getItem(STOCK_KEY)) || {};
+
+        const $ = id => document.getElementById(id);
+
+        $('loginBtn').onclick = () => {
+            if ($('pass').value === ADMIN_PASS) {
+                $('loginBox').style.display = 'none';
+                $('adminPanel').style.display = 'block';
+                renderModules();
+            } else {
+                $('error').style.display = 'block';
+            }
+        };
+
+        function renderModules() {
+            const list = $('modulesList');
+            list.innerHTML = '';
+            Object.keys(stock).forEach(name => {
+                const div = document.createElement('div');
+                div.className = 'module';
+                div.innerHTML = `
+                    <input type="text" value="${name}" data-old="${name}" placeholder="Modulname">
+                    <textarea placeholder="email:pass (eine pro Zeile)" style="height:120px;">${stock[name].accounts.join('\n')}</textarea>
+                    <button class="del-btn" data-name="${name}">Löschen</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        $('addModuleBtn').onclick = () => {
+            const name = prompt("Modulname (z.B. Netflix):");
+            if (name && !stock[name]) {
+                stock[name] = { accounts: [] };
+                renderModules();
+            }
+        };
+
+        $('modulesList').addEventListener('click', e => {
+            if (e.target.classList.contains('del-btn')) {
+                const name = e.target.dataset.name;
+                if (confirm(`"${name}" löschen?`)) {
+                    delete stock[name];
+                    renderModules();
+                }
+            }
+        });
+
+        $('saveBtn').onclick = () => {
+            const newStock = {};
+            document.querySelectorAll('.module').forEach(mod => {
+                const oldName = mod.querySelector('input').dataset.old;
+                const newName = mod.querySelector('input').value.trim();
+                const accounts = mod.querySelector('textarea').value.trim().split('\n').filter(l => l.includes(':'));
+                if (newName && accounts.length > 0) {
+                    newStock[newName] = { accounts };
+                }
+            });
+            stock = newStock;
+            localStorage.setItem(STOCK_KEY, JSON.stringify(stock));
+            alert('Alles gespeichert! Öffne index.html neu.');
+        };
+    </script>
+</body>
+</html>
