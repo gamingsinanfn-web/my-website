@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>UltimateGen</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>UltimateGen</title>
     <style>
         :root { --red: #FF4D4F; --cyan: #00FFFF; --bg: #0d1117; --card: #1a1f2e; --text: #e8eef6; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -61,7 +64,6 @@
             background: var(--card); padding: 25px; border-radius: 16px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.7); max-height: 80vh; overflow-y: auto; transform: scale(0.8); transition: transform 0.3s ease;
         }
         .modal-card.show { transform: scale(1); }
-        .modal-card button { background: #00ff88; color: #000; }
         .modal-card ul { list-style: none; padding: 0; text-align: left; }
         .modal-card li { padding: 8px 0; }
         #error { color: #ff6b6b; margin-top: 10px; display: none; }
@@ -80,12 +82,12 @@
     <header>
         <h1>UltimateGen</h1>
         <a id="discord" href="https://discord.gg/zMh5NVdgCb" target="_blank">Join Discord</a>
-        <div>Mitglieder: <strong>1247</strong></div>
+        <div>Members: <strong>1247</strong></div>
     </header>
 
     <main>
         <div class="container">
-            <select id="select"><option value="">Wähle Modul</option></select>
+            <select id="select"><option value="">Select Module</option></select>
             <div>
                 <button id="gen">Generate</button>
                 <button id="claim" disabled>Claim</button>
@@ -93,17 +95,17 @@
             </div>
             <div id="accountBox"></div>
             <div class="stats">
-                <p>Aktive Nutzer: <span id="users">0</span></p>
+                <p>Active Users: <span id="users">0</span></p>
             </div>
 
-            <button id="adminBtn">Admin öffnen</button>
+            <button id="adminBtn">Open Admin</button>
 
             <div id="adminPanel">
-                <h3>Stock bearbeiten</h3>
+                <h3>Edit Stock</h3>
                 <div id="modules"></div>
-                <button id="addBtn" style="background:#00ff88;color:#000;">+ Neues Modul</button>
-                <button id="saveBtn" style="background:#00ff88;color:#000;margin-top:15px;">SPEICHERN</button>
-                <button id="closeBtn" style="background:#666;margin-top:8px;">Schließen</button>
+                <button id="addBtn" style="background:#00ff88;color:#000;">+ New Module</button>
+                <button id="saveBtn" style="background:#00ff88;color:#000;margin-top:15px;">SAVE</button>
+                <button id="closeBtn" style="background:#666;margin-top:8px;">Close</button>
             </div>
         </div>
     </main>
@@ -112,11 +114,11 @@
 
     <div class="modal-overlay" id="loginModal">
         <div class="modal-card">
-            <h3>Admin Passwort</h3>
-            <input id="pass" type="password" placeholder="Passwort eingeben" />
-            <button id="loginBtn">Einloggen</button>
-            <p id="error">Falsches Passwort!</p>
-            <button id="cancelBtn" style="background:#666;margin-top:10px;">Abbrechen</button>
+            <h3>Admin Password</h3>
+            <input id="pass" type="password" placeholder="Enter Password" />
+            <button id="loginBtn">Login</button>
+            <p id="error" style="display:none;">Wrong Password!</p>
+            <button id="cancelBtn" style="background:#666;margin-top:10px;">Cancel</button>
         </div>
     </div>
 
@@ -130,6 +132,7 @@
         function loadData() {
             try {
                 data = JSON.parse(localStorage.getItem(STOCK)) || {};
+                console.log('Data loaded from localStorage:', data);
             } catch (err) {
                 console.error('Failed to load data from localStorage:', err);
                 data = {};
@@ -139,8 +142,11 @@
         // Update the module select dropdown
         function updateSelect() {
             const select = document.getElementById('select');
-            if (!select) return console.error('Select element not found');
-            select.innerHTML = '<option value="">Wähle Modul</option>';
+            if (!select) {
+                console.error('Select element not found');
+                return;
+            }
+            select.innerHTML = '<option value="">Select Module</option>';
             Object.keys(data).forEach(key => {
                 if (Array.isArray(data[key]) && data[key].length > 0) {
                     const option = document.createElement('option');
@@ -154,7 +160,7 @@
         // Show stock in a modal
         function showStock() {
             console.log('Stock button clicked');
-            let html = '<h3>Verfügbarer Stock</h3><ul>';
+            let html = '<h3>Available Stock</h3><ul>';
             let hasStock = false;
 
             Object.keys(data).forEach(key => {
@@ -164,14 +170,14 @@
                 }
             });
 
-            html += hasStock ? '</ul>' : '</ul><p><em>Kein Stock verfügbar.</em></p>';
+            html += hasStock ? '</ul>' : '</ul><p><em>No stock available.</em></p>';
 
             const modal = document.createElement('div');
             modal.className = 'modal-overlay';
             modal.innerHTML = `
                 <div class="modal-card">
                     ${html}
-                    <button id="modalCloseBtn" style="margin-top:15px;padding:10px;background:#ff4d4f;color:#000;border:none;border-radius:8px;">Schließen</button>
+                    <button id="modalCloseBtn" style="margin-top:15px;padding:10px;background:#ff4d4f;color:#000;border:none;border-radius:8px;">Close</button>
                 </div>
             `;
             document.body.appendChild(modal);
@@ -194,15 +200,18 @@
         // Render admin panel
         function renderAdmin() {
             const list = document.getElementById('modules');
-            if (!list) return console.error('Modules element not found');
+            if (!list) {
+                console.error('Modules element not found');
+                return;
+            }
             list.innerHTML = '';
             Object.keys(data).forEach(key => {
                 const div = document.createElement('div');
                 div.className = 'module';
                 div.innerHTML = `
-                    <input type="text" value="${key}" data-old="${key}" placeholder="Modulname" required>
-                    <textarea placeholder="email:pass (eine pro Zeile)" style="height:100px;">${(data[key] || []).join('\n')}</textarea>
-                    <button class="del" data-name="${key}">Löschen</button>
+                    <input type="text" value="${key}" data-old="${key}" placeholder="Module name" required>
+                    <textarea placeholder="email:pass (one per line)" style="height:100px;">${(data[key] || []).join('\n')}</textarea>
+                    <button class="del" data-name="${key}">Delete</button>
                 `;
                 list.appendChild(div);
             });
@@ -212,17 +221,7 @@
         function init() {
             loadData();
             updateSelect();
-            if (location.search.includes('c=')) {
-                const claimBtn = document.getElementById('claim');
-                const accountBox = document.getElementById('accountBox');
-                if (claimBtn && accountBox) {
-                    claimBtn.disabled = false;
-                    accountBox.innerHTML = '<em>Verifiziert – klicke auf Claim!</em>';
-                    accountBox.style.display = 'block';
-                } else {
-                    console.error('Claim or accountBox element not found');
-                }
-            }
+            console.log('Page initialized');
         }
 
         // Save data to localStorage
@@ -230,14 +229,15 @@
             try {
                 localStorage.setItem(STOCK, JSON.stringify(data));
                 updateSelect();
-                alert('Stock gespeichert!');
+                alert('Stock saved!');
             } catch (err) {
                 console.error('Failed to save data to localStorage:', err);
-                alert('Fehler beim Speichern des Stocks!');
+                alert('Error saving stock!');
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOMContentLoaded fired');
             init();
 
             // DOM elements
@@ -261,12 +261,13 @@
             };
 
             if (Object.values(elements).some(el => !el)) {
-                console.error('One or more DOM elements not found');
+                console.error('One or more DOM elements not found:', elements);
                 return;
             }
 
             // Admin panel handlers
             elements.adminBtn.onclick = () => {
+                console.log('Admin button clicked');
                 elements.loginModal.style.display = 'flex';
                 elements.passInput.focus();
                 setTimeout(() => {
@@ -286,6 +287,7 @@
 
             elements.loginBtn.onclick = () => {
                 if (elements.passInput.value === ADMIN_PASS) {
+                    console.log('Admin login successful');
                     elements.loginModal.classList.remove('show');
                     setTimeout(() => {
                         elements.loginModal.style.display = 'none';
@@ -307,22 +309,22 @@
             };
 
             elements.addBtn.onclick = () => {
-                const name = prompt("Modulname:");
+                const name = prompt('Module name:');
                 if (name && name.trim() && !data[name.trim()]) {
                     data[name.trim()] = [];
                     renderAdmin();
                     updateSelect();
                 } else if (name && data[name.trim()]) {
-                    alert('Modulname existiert bereits!');
+                    alert('Module name already exists!');
                 } else {
-                    alert('Bitte geben Sie einen gültigen Modulnamen ein.');
+                    alert('Please enter a valid module name.');
                 }
             };
 
             elements.modules.addEventListener('click', e => {
                 if (e.target.classList.contains('del')) {
                     const name = e.target.dataset.name;
-                    if (confirm(`"${name}" löschen?`)) {
+                    if (confirm(`Delete "${name}"?`)) {
                         delete data[name];
                         renderAdmin();
                         updateSelect();
@@ -345,7 +347,7 @@
                     }
                 });
                 if (!valid) {
-                    alert('Bitte geben Sie gültige Modulnamen ein.');
+                    alert('Please enter a valid module name.');
                     return;
                 }
                 data = newData;
@@ -360,14 +362,14 @@
 
             elements.genBtn.onclick = () => {
                 if (!selected || !data[selected]?.length) {
-                    alert(`Kein Stock für ${selected || 'das ausgewählte Modul'} verfügbar!`);
+                    alert(`No stock available for ${selected || 'the selected module'}!`);
                     return;
                 }
-                elements.genBtn.textContent = 'Weiterleitung...';
+                elements.genBtn.textContent = 'Redirecting...';
                 elements.genBtn.classList.add('spinner');
                 history.pushState({ verify: true }, '', `?c=${Date.now()}`);
                 elements.claimBtn.disabled = false;
-                elements.accountBox.innerHTML = '<em>Verifiziert – klicke auf Claim!</em>';
+                elements.accountBox.innerHTML = '<em>Verified – click Claim!</em>';
                 elements.accountBox.style.display = 'block';
                 setTimeout(() => {
                     elements.genBtn.textContent = 'Generate';
@@ -377,26 +379,26 @@
 
             elements.claimBtn.onclick = () => {
                 if (!selected || !data[selected]?.length) {
-                    alert(`Kein Account für ${selected || 'das ausgewählte Modul'} verfügbar!`);
+                    alert(`No account available for ${selected || 'the selected module'}!`);
                     return;
                 }
                 const account = data[selected].shift();
                 saveData();
 
                 elements.accountBox.style.display = 'block';
-                elements.accountBox.innerHTML = `<strong>${selected}:</strong><br>${account}<button class="copy">Kopieren</button>`;
+                elements.accountBox.innerHTML = `<strong>${selected}:</strong><br>${account}<button class="copy">Copy</button>`;
                 elements.accountBox.querySelector('.copy').onclick = () => {
                     navigator.clipboard.writeText(account).then(() => {
                         const btn = elements.accountBox.querySelector('.copy');
-                        btn.textContent = 'Kopiert!';
+                        btn.textContent = 'Copied!';
                         btn.style.background = '#00cc77';
                         setTimeout(() => {
-                            btn.textContent = 'Kopieren';
+                            btn.textContent = 'Copy';
                             btn.style.background = '#00ff88';
                         }, 1500);
                     }).catch(err => {
                         console.error('Clipboard copy failed:', err);
-                        alert('Fehler beim Kopieren!');
+                        alert('Error copying to clipboard!');
                     });
                 };
 
@@ -411,6 +413,13 @@
                 console.log('Stock button clicked');
                 showStock();
             };
+
+            // Handle popstate for claim verification
+            if (location.search.includes('c=')) {
+                elements.claimBtn.disabled = false;
+                elements.accountBox.innerHTML = '<em>Verified – click Claim!</em>';
+                elements.accountBox.style.display = 'block';
+            }
         });
 
         window.addEventListener('popstate', init);
