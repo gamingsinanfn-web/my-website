@@ -155,6 +155,7 @@
                     select.appendChild(option);
                 }
             });
+            console.log('Select dropdown updated');
         }
 
         // Show stock in a modal
@@ -184,13 +185,17 @@
             setTimeout(() => {
                 modal.classList.add('show');
                 modal.querySelector('.modal-card').classList.add('show');
+                console.log('Stock modal displayed');
             }, 10);
 
             const modalCloseBtn = document.getElementById('modalCloseBtn');
             if (modalCloseBtn) {
                 modalCloseBtn.onclick = () => {
                     modal.classList.remove('show');
-                    setTimeout(() => modal.remove(), 300);
+                    setTimeout(() => {
+                        modal.remove();
+                        console.log('Stock modal closed');
+                    }, 300);
                 };
             } else {
                 console.error('Modal close button not found');
@@ -215,6 +220,7 @@
                 `;
                 list.appendChild(div);
             });
+            console.log('Admin panel rendered');
         }
 
         // Initialize page state
@@ -230,6 +236,7 @@
                 localStorage.setItem(STOCK, JSON.stringify(data));
                 updateSelect();
                 alert('Stock saved!');
+                console.log('Data saved to localStorage:', data);
             } catch (err) {
                 console.error('Failed to save data to localStorage:', err);
                 alert('Error saving stock!');
@@ -282,6 +289,7 @@
                     elements.loginModal.style.display = 'none';
                     elements.passInput.value = '';
                     elements.error.style.display = 'none';
+                    console.log('Login modal closed');
                 }, 300);
             };
 
@@ -297,15 +305,19 @@
                     }, 300);
                 } else {
                     elements.error.style.display = 'block';
+                    console.log('Admin login failed: Wrong password');
                 }
             };
 
             elements.passInput.addEventListener('keypress', e => {
-                if (e.key === 'Enter') elements.loginBtn.click();
+                if (e.key === 'Enter') {
+                    elements.loginBtn.click();
+                }
             });
 
             elements.closeBtn.onclick = () => {
                 elements.adminPanel.style.display = 'none';
+                console.log('Admin panel closed');
             };
 
             elements.addBtn.onclick = () => {
@@ -314,6 +326,7 @@
                     data[name.trim()] = [];
                     renderAdmin();
                     updateSelect();
+                    console.log(`New module added: ${name}`);
                 } else if (name && data[name.trim()]) {
                     alert('Module name already exists!');
                 } else {
@@ -328,6 +341,7 @@
                         delete data[name];
                         renderAdmin();
                         updateSelect();
+                        console.log(`Module deleted: ${name}`);
                     }
                 }
             });
@@ -358,6 +372,7 @@
             elements.select.onchange = () => {
                 selected = elements.select.value;
                 elements.genBtn.disabled = !selected;
+                console.log(`Selected module: ${selected}`);
             };
 
             elements.genBtn.onclick = () => {
@@ -371,6 +386,7 @@
                 elements.claimBtn.disabled = false;
                 elements.accountBox.innerHTML = '<em>Verified – click Claim!</em>';
                 elements.accountBox.style.display = 'block';
+                console.log('Generate button clicked');
                 setTimeout(() => {
                     elements.genBtn.textContent = 'Generate';
                     elements.genBtn.classList.remove('spinner');
@@ -396,6 +412,7 @@
                             btn.textContent = 'Copy';
                             btn.style.background = '#00ff88';
                         }, 1500);
+                        console.log(`Account copied: ${account}`);
                     }).catch(err => {
                         console.error('Clipboard copy failed:', err);
                         alert('Error copying to clipboard!');
@@ -406,11 +423,11 @@
                 elements.genBtn.disabled = !selected;
                 elements.genBtn.textContent = 'Generate';
                 history.replaceState(null, '', location.pathname);
+                console.log('Claim button clicked');
             };
 
             // Stock button
             elements.stockBtn.onclick = () => {
-                console.log('Stock button clicked');
                 showStock();
             };
 
@@ -419,6 +436,7 @@
                 elements.claimBtn.disabled = false;
                 elements.accountBox.innerHTML = '<em>Verified – click Claim!</em>';
                 elements.accountBox.style.display = 'block';
+                console.log('Claim verification detected');
             }
         });
 
@@ -431,7 +449,10 @@
             if (now - lastUpdate < 10000) return;
             lastUpdate = now;
             const users = document.getElementById('users');
-            if (users) users.textContent = Math.floor(Math.random() * 100) + 30;
+            if (users) {
+                users.textContent = Math.floor(Math.random() * 100) + 30;
+                console.log('Active users updated');
+            }
         }
 
         setInterval(updateUsers, 1000);
